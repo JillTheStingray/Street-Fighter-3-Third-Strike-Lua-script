@@ -1,6 +1,12 @@
 # Street-Fighter-3-Third-Strike-Lua-script
-This is a lua script for sfiii. with only Auto Parry, Infinite Power, Infinite Energy, and Select Universal Cancel Setting; Special + Super + Crazy Cancel only.
+This is a lua script for SFIII that only includes;
 
-This is was intended to function in Fightcade
+Auto Parry 
+Infinite Power 
+Infinite Energy
+Select Universal Cancel Setting; Special + Super + Crazy Cancel alone.
 
-This only works only offline, if you manage to make this work in online matches, i am not responsible for any suspentions or bans
+This was designed to work in Fightcade, as Enable Cheats does not work there.
+
+This only works offline; if you are able to make it function in online matches, I am not liable for any sanctions or bans.
+
