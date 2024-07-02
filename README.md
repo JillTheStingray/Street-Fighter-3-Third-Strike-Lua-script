@@ -9,6 +9,8 @@ Infinite Energy
 
 Select Universal Cancel Setting; Special + Super + Crazy Cancel.
 
+And more coming soon
+
 This was designed to work in Fightcade, as Enable Cheats does not work there.
 This only works offline; if you are able to make it function in online matches, I am not liable for any sanctions or bans.
 
