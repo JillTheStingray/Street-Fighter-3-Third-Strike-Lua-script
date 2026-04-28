@@ -132,9 +132,9 @@ end
 function get_color(cheat, is_selected)
     if is_selected then return "red" end
     if cheat.characters or cheat.super_arts or cheat.bonus_damage or cheat.options then
-        return "#00FFFF"
+        return "yellow"
     end
-    return cheat.enabled and "#00FF00" or "white"
+    return cheat.enabled and "green" or "white"
 end
 
 function toggle_cheat(cheat)
@@ -180,6 +180,7 @@ end
 function handle_input()
     input_counter = input_counter + 1
     local keys = input.get()
+    if not keys then return end
 
     if input_counter > input_delay then
         if keys.M then
