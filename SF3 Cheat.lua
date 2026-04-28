@@ -19,10 +19,10 @@ local cheats = {
     { name = "No Combo Damage Reduction PL1", address = {0x20694D6}, values = {0x00}, default_values = {0x00}, enabled = false },
     { name = "Semi Infinite Juggle PL1", address = {0x20694C9}, values = {0x00}, default_values = {0x00}, enabled = false },
     { name = "True Infinite Juggle PL1", address = {0x20694C6}, values = {0x00}, default_values = {0x00}, enabled = false },
-    { name = "Select Stun Bar Length PL2", address = {0x206960B}, values = {0x38, 0x40, 0x48, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x50, 0x58, 0x60}, default_values = {0x00}, enabled = false,
+    { name = "Select Stun Bar Length PL2", address = 0x206960B, selected_option = 1,
       options = {
         { name = "Disabled", value = 0x00 }, { name = "56 (Small)", value = 0x38 }, { name = "64 (Medium)", value = 0x40 },
-        { name = "72 (Large)", value = 0x48 }, { name = "8", value = 0x08 }, { name = "16 (Medium)", value = 0x10 },
+        { name = "72 (Large)", value = 0x48 }, { name = "8", value = 0x08 }, { name = "16", value = 0x10 },
         { name = "24", value = 0x18 }, { name = "32", value = 0x20 }, { name = "40", value = 0x28 },
         { name = "48", value = 0x30 }, { name = "80", value = 0x50 }, { name = "88", value = 0x58 },
         { name = "96", value = 0x60 }
@@ -107,6 +107,28 @@ local current_cheat_index = 1
 local input_counter = 0
 local input_delay = 10
 
+function get_status(cheat)
+    if cheat.characters then
+        return cheat.characters[cheat.selected_character].name
+    elseif cheat.super_arts then
+        return cheat.super_arts[cheat.selected_super_art].name
+    elseif cheat.bonus_damage then
+        return cheat.bonus_damage[cheat.selected_bonus_damage].name
+    elseif cheat.options then
+        return cheat.options[cheat.selected_option].name
+    else
+        return cheat.enabled and "Enabled" or "Disabled"
+    end
+end
+
+function get_color(cheat, is_selected)
+    if is_selected then return "red" end
+    if cheat.characters or cheat.super_arts or cheat.bonus_damage or cheat.options then
+        return "cyan"
+    end
+    return cheat.enabled and "lime" or "white"
+end
+
 function toggle_cheat(cheat)
     cheat.enabled = not cheat.enabled
     if cheat.enabled then
@@ -120,98 +142,100 @@ function toggle_cheat(cheat)
     end
 end
 
-function select_character(cheat, character_index)
-    cheat.selected_character = character_index
-    local character = cheat.characters[character_index]
+function select_option(cheat, index)
+    cheat.selected_option = index
+    memory.writebyte(cheat.address, cheat.options[index].value)
+end
+
+function select_character(cheat, index)
+    cheat.selected_character = index
+    local character = cheat.characters[index]
     for i = 1, #character.address do
         memory.writebyte(character.address[i], character.values[i])
     end
 end
 
-function select_super_art(cheat, super_art_index)
-    cheat.selected_super_art = super_art_index
-    local super_art = cheat.super_arts[super_art_index]
+function select_super_art(cheat, index)
+    cheat.selected_super_art = index
+    local super_art = cheat.super_arts[index]
     memory.writebyte(super_art.address, super_art.value)
 end
 
-function select_bonus_damage(cheat, bonus_damage_index)
-    cheat.selected_bonus_damage = bonus_damage_index
-    local bonus_damage = cheat.bonus_damage[bonus_damage_index]
+function select_bonus_damage(cheat, index)
+    cheat.selected_bonus_damage = index
+    local bonus_damage = cheat.bonus_damage[index]
     for i = 1, #bonus_damage.address do
         memory.writebyte(bonus_damage.address[i], bonus_damage.values[i])
     end
 end
 
-function toggle_bonus_damage(cheat)
-    cheat.enabled = not cheat.enabled
-    if cheat.enabled then
-        for i = 1, #cheat.address do
-            memory.writebyte(cheat.address[i], cheat.values[i])
-        end
-    else
-        for i = 1, #cheat.address do
-            memory.writebyte(cheat.address[i], cheat.default_values[i])
-        end
-    end
-end
-
 function handle_input()
     input_counter = input_counter + 1
-    local input = input.get()
+    local keys = input.get()
 
     if input_counter > input_delay then
-        if input.M then
+        if keys.M then
             menu_open = not menu_open
             input_counter = 0
             return
         end
 
         if menu_open then
-            local current_cheat = cheats[current_cheat_index]
+            local cheat = cheats[current_cheat_index]
 
-            if current_cheat.name == "Select Character PL1" then
-                if input.right then
-                    current_cheat.selected_character = current_cheat.selected_character % #current_cheat.characters + 1
-                    select_character(current_cheat, current_cheat.selected_character)
+            if cheat.characters then
+                if keys.right then
+                    cheat.selected_character = cheat.selected_character % #cheat.characters + 1
+                    select_character(cheat, cheat.selected_character)
                     input_counter = 0
-                elseif input.left then
-                    current_cheat.selected_character = (current_cheat.selected_character - 2 + #current_cheat.characters) % #current_cheat.characters + 1
-                    select_character(current_cheat, current_cheat.selected_character)
-                    input_counter = 0
-                end
-            elseif current_cheat.name == "Select Super Art PL1" then
-                if input.right then
-                    current_cheat.selected_super_art = current_cheat.selected_super_art % #current_cheat.super_arts + 1
-                    select_super_art(current_cheat, current_cheat.selected_super_art)
-                    input_counter = 0
-                elseif input.left then
-                    current_cheat.selected_super_art = (current_cheat.selected_super_art - 2 + #current_cheat.super_arts) % #current_cheat.super_arts + 1
-                    select_super_art(current_cheat, current_cheat.selected_super_art)
+                elseif keys.left then
+                    cheat.selected_character = (cheat.selected_character - 2 + #cheat.characters) % #cheat.characters + 1
+                    select_character(cheat, cheat.selected_character)
                     input_counter = 0
                 end
-            elseif current_cheat.name == "Select Bonus Damage PL1" then
-                if input.right then
-                    current_cheat.selected_bonus_damage = current_cheat.selected_bonus_damage % #current_cheat.bonus_damage + 1
-                    select_bonus_damage(current_cheat, current_cheat.selected_bonus_damage)
+            elseif cheat.super_arts then
+                if keys.right then
+                    cheat.selected_super_art = cheat.selected_super_art % #cheat.super_arts + 1
+                    select_super_art(cheat, cheat.selected_super_art)
                     input_counter = 0
-                elseif input.left then
-                    current_cheat.selected_bonus_damage = (current_cheat.selected_bonus_damage - 2 + #current_cheat.bonus_damage) % #current_cheat.bonus_damage + 1
-                    select_bonus_damage(current_cheat, current_cheat.selected_bonus_damage)
+                elseif keys.left then
+                    cheat.selected_super_art = (cheat.selected_super_art - 2 + #cheat.super_arts) % #cheat.super_arts + 1
+                    select_super_art(cheat, cheat.selected_super_art)
+                    input_counter = 0
+                end
+            elseif cheat.bonus_damage then
+                if keys.right then
+                    cheat.selected_bonus_damage = cheat.selected_bonus_damage % #cheat.bonus_damage + 1
+                    select_bonus_damage(cheat, cheat.selected_bonus_damage)
+                    input_counter = 0
+                elseif keys.left then
+                    cheat.selected_bonus_damage = (cheat.selected_bonus_damage - 2 + #cheat.bonus_damage) % #cheat.bonus_damage + 1
+                    select_bonus_damage(cheat, cheat.selected_bonus_damage)
+                    input_counter = 0
+                end
+            elseif cheat.options then
+                if keys.right then
+                    cheat.selected_option = cheat.selected_option % #cheat.options + 1
+                    select_option(cheat, cheat.selected_option)
+                    input_counter = 0
+                elseif keys.left then
+                    cheat.selected_option = (cheat.selected_option - 2 + #cheat.options) % #cheat.options + 1
+                    select_option(cheat, cheat.selected_option)
                     input_counter = 0
                 end
             else
-                if input.right then
-                    toggle_cheat(current_cheat)
+                if keys.right then
+                    toggle_cheat(cheat)
                     input_counter = 0
                 end
             end
 
-            if input.down then
+            if keys.down then
                 current_cheat_index = current_cheat_index % #cheats + 1
                 input_counter = 0
             end
-            
-            if input.up then
+
+            if keys.up then
                 current_cheat_index = (current_cheat_index - 2 + #cheats) % #cheats + 1
                 input_counter = 0
             end
@@ -221,28 +245,16 @@ end
 
 while true do
     if menu_open then
-        gui.box(5, 5, 100, 220, "white", "black")  
-        gui.box(6, 6, 271, 221, "black", "black")  
-        gui.box(4, 4, 269, 219, "black", "black")  
-        gui.box(6, 6, 268, 218, "red")             
-        gui.box(7, 7, 267, 217, "lightgray")       
-        gui.text(11, 11, "Toggle Cheats (Press 'M' to hide.       Made by JillTheStingray", "black")
-        gui.text(10, 10, "Toggle Cheats (Press 'M' to hide.       Made by JillTheStingray", "white")
-       
+        gui.box(6, 6, 271, 221, "black", "black")
+        gui.box(4, 4, 269, 219, "black", "black")
+        gui.box(6, 6, 268, 218, "red")
+        gui.box(7, 7, 267, 217, "lightgray")
+        gui.text(11, 11, "Toggle Cheats (Press 'M' to hide)   Made by JillTheStingray", "black")
+        gui.text(10, 10, "Toggle Cheats (Press 'M' to hide)   Made by JillTheStingray", "white")
 
         for i, cheat in ipairs(cheats) do
-            local status
-            if cheat.name == "Select Character PL1" then
-                status = cheat.characters[cheat.selected_character].name
-            elseif cheat.name == "Select Super Art PL1" then
-                status = cheat.super_arts[cheat.selected_super_art].name
-            elseif cheat.name == "Select Bonus Damage PL1" then
-                status = cheat.bonus_damage[cheat.selected_bonus_damage].name
-            else
-                status = cheat.enabled and "Enabled" or "Disabled"
-            end
-            local color = i == current_cheat_index and "red" or "white"
-            
+            local status = get_status(cheat)
+            local color = get_color(cheat, i == current_cheat_index)
             gui.text(19, 17 + i * 11, string.format("%d. %s - %s", i, cheat.name, status), "black")
             gui.text(18, 16 + i * 11, string.format("%d. %s - %s", i, cheat.name, status), color)
         end
@@ -250,21 +262,25 @@ while true do
         gui.text(11, 11, "Press 'M' to open the menu.                                 Made by JillTheStingray", "black")
         gui.text(10, 10, "Press 'M' to open the menu.                                 Made by JillTheStingray", "white")
     end
+
     handle_input()
-    
+
     for _, cheat in ipairs(cheats) do
         if cheat.enabled then
             for i = 1, #cheat.address do
                 memory.writebyte(cheat.address[i], cheat.values[i])
             end
         end
-        if cheat.name == "Select Bonus Damage PL1" then
-            local bonus_damage = cheat.bonus_damage[cheat.selected_bonus_damage]
-            for i = 1, #bonus_damage.address do
-                memory.writebyte(bonus_damage.address[i], bonus_damage.values[i])
+        if cheat.options then
+            memory.writebyte(cheat.address, cheat.options[cheat.selected_option].value)
+        end
+        if cheat.bonus_damage then
+            local bd = cheat.bonus_damage[cheat.selected_bonus_damage]
+            for i = 1, #bd.address do
+                memory.writebyte(bd.address[i], bd.values[i])
             end
         end
     end
-    
+
     emu.frameadvance()
 end
