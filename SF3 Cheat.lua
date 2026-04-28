@@ -132,9 +132,9 @@ end
 function get_color(cheat, is_selected)
     if is_selected then return "red" end
     if cheat.characters or cheat.super_arts or cheat.bonus_damage or cheat.options then
-        return "cyan"
+        return "#00FFFF"
     end
-    return cheat.enabled and "lime" or "white"
+    return cheat.enabled and "#00FF00" or "white"
 end
 
 function toggle_cheat(cheat)
