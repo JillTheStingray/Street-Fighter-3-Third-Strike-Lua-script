@@ -501,9 +501,33 @@ end
 ---------------------------------------------------------------
 -- OPTION / CHEAT APPLY HELPERS
 ---------------------------------------------------------------
+
+-- When enabling a cheat, disable any other enabled cheat that writes
+-- to the same address to avoid silent conflicts.
+local function disable_conflicts(target)
+    for _, c in ipairs(cheats) do
+        if c ~= target and c.enabled and c.address then
+            for _, ta in ipairs(target.address) do
+                for _, ca in ipairs(c.address) do
+                    if ca == ta then
+                        c.enabled = false
+                        if c.default_values then
+                            for i = 1, #c.address do
+                                write(c.address[i], c.default_values[i] or 0)
+                            end
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end
+end
+
 local function toggle_cheat(c)
     if not c.address or not c.values then return end
     c.enabled = not c.enabled
+    if c.enabled then disable_conflicts(c) end
     local src = c.enabled and c.values or c.default_values
     if not src then return end
     for i=1,#c.address do
@@ -605,6 +629,7 @@ local function handle_input()
     local list = visible_cheats()
     clamp_selection(list)
     local c = list[current_cheat_index]
+    if not c then return end
 
     -- Tab switching
     if inp.Q then
@@ -734,10 +759,10 @@ local function draw_menu()
 
         -- status
         local status
-        if c.characters then status = c.characters[c.selected_character].name
-        elseif c.super_arts then status = c.super_arts[c.selected_super_art].name
-        elseif c.bonus_damage then status = c.bonus_damage[c.selected_bonus_damage].name
-        elseif c.options then status = c.options[c.selected_option].name
+        if c.characters then status = c.characters[c.selected_character or 1].name
+        elseif c.super_arts then status = c.super_arts[c.selected_super_art or 1].name
+        elseif c.bonus_damage then status = c.bonus_damage[c.selected_bonus_damage or 1].name
+        elseif c.options then status = c.options[c.selected_option or 1].name
         elseif c.enabled then status = "On"
         else status = "Off" end
 
