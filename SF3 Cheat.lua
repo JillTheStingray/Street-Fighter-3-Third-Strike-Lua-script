@@ -10,11 +10,19 @@ local cheats = {
     { name = "Select Grab Tech PL1", address = {0x2026328}, values = {0x00}, default_values = {0x00}, enabled = false },
     { name = "Infinite Time (Enabled by default)", address = {0x2011377}, values = {0x63}, default_values = {0x00}, enabled = true },
     { name = "No Selection Time (Enabled by default)", address = {0x20154FB}, values = {0x99}, default_values = {0x00}, enabled = true },
-    { name = "All Universal Combos", address = {0x2068E8D}, values = {0x0F}, default_values = {0x00}, enabled = false },
+    { name = "Select Universal Combos", address = 0x2068E8D, selected_option = 1,
+      options = {
+        { name = "Disabled", value = 0x00 },
+        { name = "All Universal Combos", value = 0x0F },
+        { name = "Special + Super", value = 0x60 }
+      }
+    },
     { name = "Infinite Power PL1", address = {0x20695B5}, values = {0xA0}, default_values = {0x00}, enabled = false },
-    { name = "Infinite Gauge PL1", address = {0x20695BA, 0x20695BB, 0x20695BC, 0x20695BD, 0x20695BE, 0x20695BF}, values = {0x00, 0x03, 0x00, 0x03, 0x00, 0x03}, default_values = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, enabled = false },
+    { name = "Infinite Gauge PL1", address = {0x20695B5, 0x20695BE}, values = {0xA0, 0x03}, default_values = {0x00, 0x00}, enabled = false },
     { name = "Infinite Energy PL1", address = {0x2068D0B}, values = {0xA0}, default_values = {0x00}, enabled = false },
-    { name = "Special + Super", address = {0x2068E8D}, values = {0x60}, default_values = {0x00}, enabled = false },
+    { name = "Infinite Energy PL2", address = {0x020691A3}, values = {0xA0}, default_values = {0x00}, enabled = false },
+    { name = "Infinite Power PL2", address = {0x020695E1}, values = {0xA0}, default_values = {0x00}, enabled = false },
+    { name = "Infinite Gauge PL2", address = {0x020695E1, 0x020695EB}, values = {0xA0, 0x03}, default_values = {0x00, 0x00}, enabled = false },
     { name = "Select Stun Status Enemy", address = {0x2069611}, values = {0x60}, default_values = {0x00}, enabled = false },
     { name = "No Combo Damage Reduction PL1", address = {0x20694D6}, values = {0x00}, default_values = {0x00}, enabled = false },
     { name = "Semi Infinite Juggle PL1", address = {0x20694C9}, values = {0x00}, default_values = {0x00}, enabled = false },
@@ -245,10 +253,11 @@ end
 
 while true do
     if menu_open then
-        gui.box(6, 6, 271, 221, "black", "black")
-        gui.box(4, 4, 269, 219, "black", "black")
-        gui.box(6, 6, 268, 218, "red")
-        gui.box(7, 7, 267, 217, "lightgray")
+        local box_h = 26 + #cheats * 11
+        gui.box(6, 6, 271, box_h + 2, "black", "black")
+        gui.box(4, 4, 269, box_h,     "black", "black")
+        gui.box(6, 6, 268, box_h - 1, "red")
+        gui.box(7, 7, 267, box_h - 2, "lightgray")
         gui.text(11, 11, "Toggle Cheats (Press 'M' to hide)   Made by JillTheStingray", "black")
         gui.text(10, 10, "Toggle Cheats (Press 'M' to hide)   Made by JillTheStingray", "white")
 
