@@ -150,7 +150,7 @@ local cheats = {
         category = "Player",
         selected_option = 1,
         options = {
-            {name="Disabled", address={0x20695F7}, values={0x00}},
+            {name="Disabled", address={}, values={}},
             {name="Small",    address={0x20695F7}, values={0x38}},
             {name="Medium",   address={0x20695F7}, values={0x40}},
             {name="Large",    address={0x20695F7}, values={0x48}},
@@ -162,7 +162,7 @@ local cheats = {
         category = "Player",
         selected_option = 1,
         options = {
-            {name="Disabled", address={0x2069602}, values={0x00}},
+            {name="Disabled", address={}, values={}},
             {name="Slow",     address={0x2069602}, values={0x0A}},
             {name="Medium",   address={0x2069602}, values={0x0B}},
             {name="Fast",     address={0x2069602}, values={0x0C}},
@@ -369,9 +369,10 @@ local cheats = {
         category = "Player",
         selected_super_art = 1,
         super_arts = {
-            { name="SA-1", address=0x201138B, value=0x00 },
-            { name="SA-2", address=0x201138B, value=0x01 },
-            { name="SA-3", address=0x201138B, value=0x02 },
+            { name="Disabled", address=0x201138B, value=nil  },
+            { name="SA-1",     address=0x201138B, value=0x00 },
+            { name="SA-2",     address=0x201138B, value=0x01 },
+            { name="SA-3",     address=0x201138B, value=0x02 },
         }
     },
 
@@ -380,7 +381,7 @@ local cheats = {
         category = "Player",
         selected_option = 1,
         options = {
-            { name="Disabled", address={0x2015683}, values={0x00} },
+            { name="Disabled", address={},          values={}     },
             { name="LP",       address={0x2015683}, values={0x00} },
             { name="MP",       address={0x2015683}, values={0x01} },
             { name="HP",       address={0x2015683}, values={0x02} },
@@ -490,7 +491,7 @@ local cheats = {
         category = "System",
         selected_option = 1,
         options = (function()
-            local t = {}
+            local t = {{name="Disabled", address={}, values={}}}
             for i=0,9 do
                 table.insert(t, {name=tostring(i), address={0x02011383}, values={i}})
             end
@@ -503,7 +504,7 @@ local cheats = {
         category = "System",
         selected_option = 1,
         options = (function()
-            local t = {}
+            local t = {{name="Disabled", address={}, values={}}}
             for i=0,9 do
                 table.insert(t, {name=tostring(i), address={0x02011385}, values={i}})
             end
@@ -734,7 +735,7 @@ end
 local function select_super_art(c, idx)
     c.selected_super_art = idx
     local d = c.super_arts[idx]
-    write(d.address, d.value)
+    if d.value ~= nil then write(d.address, d.value) end
 end
 
 local function select_bonus_damage(c, idx)
@@ -845,7 +846,7 @@ local function handle_input()
 
         elseif c.super_arts then
             local total = #c.super_arts
-            local idx = ((c.selected_super_art - 1 + dir + total) % total) + 1
+            local idx = (((c.selected_super_art or 1) - 1 + dir + total) % total) + 1
             select_super_art(c, idx)
 
         elseif c.bonus_damage then
@@ -990,7 +991,9 @@ while true do
             end
 
         elseif c.super_arts then
-            select_super_art(c, c.selected_super_art or 1)
+            if (c.selected_super_art or 1) ~= 1 then
+                select_super_art(c, c.selected_super_art)
+            end
 
         else
             apply_normal_cheat(c)
