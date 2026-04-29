@@ -244,7 +244,7 @@ local cheats = {
         category = "Player",
         selected_option = 1,
         options = {
-            {name="Disabled",   address={0x2068C76}, values={0x00}},
+            {name="Disabled",   address={}, values={}},
             {name="Face Right", address={0x2068C76}, values={0x01}},
             {name="Face Left",  address={0x2068C76}, values={0x02}},
         }
@@ -254,7 +254,7 @@ local cheats = {
         category = "Player",
         selected_option = 1,
         options = {
-            {name="Disabled",   address={0x2068C77}, values={0x00}},
+            {name="Disabled",   address={}, values={}},
             {name="Face Right", address={0x2068C77}, values={0x01}},
             {name="Face Left",  address={0x2068C77}, values={0x02}},
         }
