@@ -169,6 +169,120 @@ local cheats = {
         }
     },
 
+    -------------------------------------------------------------------
+    -- PLAYER 2 CHEATS
+    -------------------------------------------------------------------
+
+    {
+        name = "Infinite Energy PL2",
+        category = "Player",
+        address = {0x020691A3},
+        values = {0xA0},
+        default_values = {0x00},
+        enabled = false
+    },
+    {
+        name = "Drain All Energy PL2",
+        category = "Player",
+        address = {0x020691A3},
+        values = {0x00},
+        default_values = {0xA0},
+        enabled = false
+    },
+    {
+        name = "Infinite Power PL2",
+        category = "Player",
+        address = {0x020695E1},
+        values = {0xA0},
+        default_values = {0x00},
+        enabled = false
+    },
+    {
+        name = "Infinite Gauge PL2",
+        category = "Player",
+        address = {0x020695E1, 0x020695EB},
+        values = {0xA0, 0x03},
+        default_values = {0x00, 0x00},
+        enabled = false
+    },
+    {
+        name = "No Combo Damage Reduction PL2",
+        category = "Player",
+        address = {0x206953E},
+        values = {0x00},
+        default_values = {0x00},
+        enabled = false
+    },
+    {
+        name = "Semi Infinite Juggle PL2",
+        category = "Player",
+        address = {0x2069531},
+        values = {0x00},
+        default_values = {0x00},
+        enabled = false
+    },
+    {
+        name = "True Infinite Juggle PL2",
+        category = "Player",
+        address = {0x206952E},
+        values = {0x00},
+        default_values = {0x00},
+        enabled = false
+    },
+
+    {
+        name = "Stun PL1 Now",
+        category = "Player",
+        address = {0x020695FD},
+        values = {0x60},
+        default_values = {0x00},
+        enabled = false
+    },
+
+    {
+        name = "Direction Lock PL1",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled",   address={0x2068C76}, values={0x00}},
+            {name="Face Right", address={0x2068C76}, values={0x01}},
+            {name="Face Left",  address={0x2068C76}, values={0x02}},
+        }
+    },
+    {
+        name = "Direction Lock PL2",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled",   address={0x2068C77}, values={0x00}},
+            {name="Face Right", address={0x2068C77}, values={0x01}},
+            {name="Face Left",  address={0x2068C77}, values={0x02}},
+        }
+    },
+
+    {
+        name = "Max Bar Size PL1",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={}, values={}},
+            {name="x1 Bar",   address={0x20695B3}, values={0x80}},
+            {name="x2 Bars",  address={0x20695B3}, values={0xA0}},
+            {name="x3 Bars",  address={0x20695B3}, values={0xC0}},
+        }
+    },
+    {
+        name = "Max Bar Size PL2",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={}, values={}},
+            {name="x1 Bar",   address={0x20695DF}, values={0x80}},
+            {name="x2 Bars",  address={0x20695DF}, values={0xA0}},
+            {name="x3 Bars",  address={0x20695DF}, values={0xC0}},
+        }
+    },
+
     {
         name = "Infinite Fireballs",
         category = "Player",
@@ -217,6 +331,36 @@ local cheats = {
             {name="Remy",     address={0x2011387}, values={0x14}},
             {name="Gill",     address={0x201566B,0x20154CF,0x2011387}, values={0x03,0x01,0x00}},
             {name="Shin Akuma/SUV", address={0x201566B,0x20154CF,0x2011387}, values={0x00,0x06,0x0F}},
+        }
+    },
+
+    {
+        name = "Select Character PL2",
+        category = "Player",
+        selected_character = 1,
+        characters = {
+            {name="Disabled",       address={0x2011389}, values={0x00}},
+            {name="Alex",           address={0x2011389}, values={0x01}},
+            {name="Ryu",            address={0x2011389}, values={0x02}},
+            {name="Yun",            address={0x2011389}, values={0x03}},
+            {name="Dudley",         address={0x2011389}, values={0x04}},
+            {name="Necro",          address={0x2011389}, values={0x05}},
+            {name="Hugo",           address={0x2011389}, values={0x06}},
+            {name="Ibuki",          address={0x2011389}, values={0x07}},
+            {name="Elena",          address={0x2011389}, values={0x08}},
+            {name="Oro",            address={0x2011389}, values={0x09}},
+            {name="Yang",           address={0x2011389}, values={0x0A}},
+            {name="Ken",            address={0x2011389}, values={0x0B}},
+            {name="Sean",           address={0x2011389}, values={0x0C}},
+            {name="Urien",          address={0x2011389}, values={0x0D}},
+            {name="Akuma",          address={0x2011389}, values={0x0E}},
+            {name="Chun-Li",        address={0x2011389}, values={0x10}},
+            {name="Makoto",         address={0x2011389}, values={0x11}},
+            {name="Q",              address={0x2011389}, values={0x12}},
+            {name="Twelve",         address={0x2011389}, values={0x13}},
+            {name="Remy",           address={0x2011389}, values={0x14}},
+            {name="Gill",           address={0x201566B,0x20154CF,0x2011389}, values={0x03,0x01,0x00}},
+            {name="Shin Akuma/SUV", address={0x201566B,0x20154CF,0x2011389}, values={0x00,0x06,0x0F}},
         }
     },
 
@@ -342,6 +486,32 @@ local cheats = {
     },
 
     {
+        name = "Set P1 Win Counter",
+        category = "System",
+        selected_option = 1,
+        options = (function()
+            local t = {}
+            for i=0,9 do
+                table.insert(t, {name=tostring(i), address={0x02011383}, values={i}})
+            end
+            return t
+        end)()
+    },
+
+    {
+        name = "Set P2 Win Counter",
+        category = "System",
+        selected_option = 1,
+        options = (function()
+            local t = {}
+            for i=0,9 do
+                table.insert(t, {name=tostring(i), address={0x02011385}, values={i}})
+            end
+            return t
+        end)()
+    },
+
+    {
         name = "Screen X Lock",
         category = "System",
         address = {0x2026CB1},
@@ -416,6 +586,15 @@ local cheats = {
         address = {0x2026328},
         values = {0x01},
         default_values = {0x00},
+        enabled = false
+    },
+
+    {
+        name = "Auto Blocking PL2",
+        category = "Parry",
+        address = {0x20267CD,0x20267CF,0x20267D1,0x20267DE},
+        values = {0x06,0x06,0x06,0x06},
+        default_values = {0,0,0,0},
         enabled = false
     },
 
