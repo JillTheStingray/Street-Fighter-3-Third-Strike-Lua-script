@@ -136,7 +136,7 @@ local cheats = {
     },
 
     {
-        name = "Select Stun Status Enemy",
+        name = "Stun PL2 Now",
         category = "Player",
         address = {0x2069611},
         values = {0x60},
@@ -158,6 +158,18 @@ local cheats = {
     },
 
     {
+        name = "Stun Bar Length PL2",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={}, values={}},
+            {name="Small",    address={0x0206960B}, values={0x38}},
+            {name="Medium",   address={0x0206960B}, values={0x40}},
+            {name="Large",    address={0x0206960B}, values={0x48}},
+        }
+    },
+
+    {
         name = "Stun Recovery Rate PL1",
         category = "Player",
         selected_option = 1,
@@ -166,6 +178,18 @@ local cheats = {
             {name="Slow",     address={0x2069602}, values={0x0A}},
             {name="Medium",   address={0x2069602}, values={0x0B}},
             {name="Fast",     address={0x2069602}, values={0x0C}},
+        }
+    },
+
+    {
+        name = "Stun Recovery Rate PL2",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={}, values={}},
+            {name="Slow",     address={0x2069616}, values={0x0A}},
+            {name="Medium",   address={0x2069616}, values={0x0B}},
+            {name="Fast",     address={0x2069616}, values={0x0C}},
         }
     },
 
@@ -227,6 +251,41 @@ local cheats = {
         address = {0x206952E},
         values = {0x00},
         default_values = {0x00},
+        enabled = false
+    },
+
+    {
+        name = "Infinite Hitstun PL1",
+        category = "Player",
+        address = {0x20288A8},
+        values = {0xFF},
+        default_values = {0x00},
+        enabled = false
+    },
+    {
+        name = "Infinite Hitstun PL2",
+        category = "Player",
+        address = {0x20288A9},
+        values = {0xFF},
+        default_values = {0x00},
+        enabled = false
+    },
+
+    -- Fills all charge-move gauges (Urien, Remy, Chun-Li, Q, Oro, Alex)
+    {
+        name = "Infinite Charge Moves PL1",
+        category = "Player",
+        address = {0x020259D8, 0x020259F4, 0x02025A10, 0x02025A2C, 0x02025A48},
+        values = {0x7F, 0x7F, 0x7F, 0x7F, 0x7F},
+        default_values = {0x00, 0x00, 0x00, 0x00, 0x00},
+        enabled = false
+    },
+    {
+        name = "Infinite Charge Moves PL2",
+        category = "Player",
+        address = {0x02025FF8, 0x02026014, 0x02026030, 0x0202604C, 0x02026068},
+        values = {0x7F, 0x7F, 0x7F, 0x7F, 0x7F},
+        default_values = {0x00, 0x00, 0x00, 0x00, 0x00},
         enabled = false
     },
 
@@ -377,6 +436,18 @@ local cheats = {
     },
 
     {
+        name = "Select Super Art PL2",
+        category = "Player",
+        selected_super_art = 1,
+        super_arts = {
+            { name="Disabled", address=0x201138D, value=nil  },
+            { name="SA-1",     address=0x201138D, value=0x00 },
+            { name="SA-2",     address=0x201138D, value=0x01 },
+            { name="SA-3",     address=0x201138D, value=0x02 },
+        }
+    },
+
+    {
         name = "Select Colour PL1",
         category = "Player",
         selected_option = 1,
@@ -484,6 +555,19 @@ local cheats = {
         values = {0x00},
         default_values = {0x00},
         enabled = false
+    },
+
+    {
+        name = "Timer Speed",
+        category = "System",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={},          values={}},
+            {name="Frozen",   address={0x2028688}, values={0x00}},
+            {name="Slow",     address={0x2028688}, values={0x01}},
+            {name="Fast",     address={0x2028688}, values={0x04}},
+            {name="Turbo",    address={0x2028688}, values={0x08}},
+        }
     },
 
     {
