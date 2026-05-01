@@ -136,7 +136,7 @@ local cheats = {
     },
 
     {
-        name = "Stun PL2 Now",
+        name = "Select Stun Status Enemy",
         category = "Player",
         address = {0x2069611},
         values = {0x60},
@@ -250,23 +250,6 @@ local cheats = {
         category = "Player",
         address = {0x206952E},
         values = {0x00},
-        default_values = {0x00},
-        enabled = false
-    },
-
-    {
-        name = "Infinite Hitstun PL1",
-        category = "Player",
-        address = {0x20288A8},
-        values = {0xFF},
-        default_values = {0x00},
-        enabled = false
-    },
-    {
-        name = "Infinite Hitstun PL2",
-        category = "Player",
-        address = {0x20288A9},
-        values = {0xFF},
         default_values = {0x00},
         enabled = false
     },
@@ -555,19 +538,6 @@ local cheats = {
         values = {0x00},
         default_values = {0x00},
         enabled = false
-    },
-
-    {
-        name = "Timer Speed",
-        category = "System",
-        selected_option = 1,
-        options = {
-            {name="Disabled", address={},          values={}},
-            {name="Frozen",   address={0x2028688}, values={0x00}},
-            {name="Slow",     address={0x2028688}, values={0x01}},
-            {name="Fast",     address={0x2028688}, values={0x04}},
-            {name="Turbo",    address={0x2028688}, values={0x08}},
-        }
     },
 
     {
