@@ -282,6 +282,46 @@ local cheats = {
     },
 
     {
+        name = "Damage Threshold PL1",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={},          values={}    },
+            {name="Tank",     address={0x2068D15}, values={0x00}},
+            {name="Normal",   address={0x2068D15}, values={0x10}},
+            {name="Glass",    address={0x2068D15}, values={0xFF}},
+        }
+    },
+    {
+        name = "Damage Threshold PL2",
+        category = "Player",
+        selected_option = 1,
+        options = {
+            {name="Disabled", address={},          values={}    },
+            {name="Tank",     address={0x20691AD}, values={0x00}},
+            {name="Normal",   address={0x20691AD}, values={0x10}},
+            {name="Glass",    address={0x20691AD}, values={0xFF}},
+        }
+    },
+
+    {
+        name = "CPU Mode PL1",
+        category = "Player",
+        address = {0x2068C6F},
+        values = {0x00},
+        default_values = {0x03},
+        enabled = false
+    },
+    {
+        name = "CPU Mode PL2",
+        category = "Player",
+        address = {0x2069107},
+        values = {0x00},
+        default_values = {0x03},
+        enabled = false
+    },
+
+    {
         name = "Direction Lock PL1",
         category = "Player",
         selected_option = 1,
@@ -297,8 +337,8 @@ local cheats = {
         selected_option = 1,
         options = {
             {name="Disabled",   address={}, values={}},
-            {name="Face Right", address={0x2068C77}, values={0x01}},
-            {name="Face Left",  address={0x2068C77}, values={0x02}},
+            {name="Face Right", address={0x206910E}, values={0x01}},
+            {name="Face Left",  address={0x206910E}, values={0x02}},
         }
     },
 
@@ -371,8 +411,10 @@ local cheats = {
             {name="Q",        address={0x2011387}, values={0x12}},
             {name="Twelve",   address={0x2011387}, values={0x13}},
             {name="Remy",     address={0x2011387}, values={0x14}},
-            {name="Gill",     address={0x201566B,0x20154CF,0x2011387}, values={0x03,0x01,0x00}},
+            {name="Gill",       address={0x201566B,0x20154CF,0x2011387}, values={0x03,0x01,0x00}},
             {name="Shin Akuma/SUV", address={0x201566B,0x20154CF,0x2011387}, values={0x00,0x06,0x0F}},
+            {name="CAR (?)",    address={0x2011387}, values={0x15}},
+            {name="BBALL MINI", address={0x2011387}, values={0x16}},
         }
     },
 
@@ -403,6 +445,8 @@ local cheats = {
             {name="Remy",           address={0x2011389}, values={0x14}},
             {name="Gill",           address={0x201566B,0x20154CF,0x2011389}, values={0x03,0x01,0x00}},
             {name="Shin Akuma/SUV", address={0x201566B,0x20154CF,0x2011389}, values={0x00,0x06,0x0F}},
+            {name="CAR (?)",        address={0x2011389}, values={0x15}},
+            {name="BBALL MINI",     address={0x2011389}, values={0x16}},
         }
     },
 
