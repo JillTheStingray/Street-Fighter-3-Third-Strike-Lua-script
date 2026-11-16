@@ -485,6 +485,7 @@ local cheats = {
     -----------------------------------------------------------
     { name="Hitboxes", category="Display", selected_option=1,
       options={ {name="Disabled"}, {name="Both"}, {name="P1 only"}, {name="P2 only"} } },
+    { name="Projectile Boxes", category="Display", ui_only=true, enabled=true },
     { name="Push Boxes", category="Display", ui_only=true, enabled=false },
 }
 
@@ -692,7 +693,7 @@ end
 
 ---------------------------------------------------------------
 -- HITBOX VIEWER  (ported from Grouflon/3rd_training_lua draw.lua + gamestate.lua)
--- Box pointers sit in the player object (see the user's memory sheet, base+0x2A0..0x2D4);
+-- Box pointers sit in each game object (see the user's memory sheet, base+0x2A0..0x2D4);
 -- each box is 4 signed words: left, width, bottom, height.
 ---------------------------------------------------------------
 local PLAYER_BASES = {0x2068C6C, 0x2069104}
@@ -725,8 +726,11 @@ end
 
 local hitbox_setting = find_cheat("Hitboxes")
 local push_box_setting = find_cheat("Push Boxes")
+local projectile_box_setting = find_cheat("Projectile Boxes")
 
-local function draw_player_boxes(base, screen_x, screen_y, sw, sh)
+-- Draws the boxes of one game object (a player or a projectile).
+-- attack_only: Yang's SA3 clones report extra boxes; Grouflon keeps only their attack boxes.
+local function draw_object_boxes(base, screen_x, screen_y, sw, sh, attack_only)
     local valid = read_dword(base + 0x2A0)
     if not valid or valid == 0 then return end
 
@@ -739,7 +743,9 @@ local function draw_player_boxes(base, screen_x, screen_y, sw, sh)
     local py = sh - (pos_y - screen_y) - GROUND_OFFSET
 
     for _, list in ipairs(BOX_LISTS) do
-        if list.type ~= "push" or push_box_setting.enabled then
+        local wanted = (list.type ~= "push" or push_box_setting.enabled)
+                       and (not attack_only or list.type == "attack")
+        if wanted then
             local first = read_dword(base + list.offset)
             if first and first ~= 0 then
                 for i = 1, list.count do
@@ -762,6 +768,29 @@ local function draw_player_boxes(base, screen_x, screen_y, sw, sh)
     end
 end
 
+-- Projectiles live in a linked list of game objects (list 3 of the object table,
+-- as in Grouflon's read_projectiles / cps3-hitboxes.lua). Each object is 0x800 bytes;
+-- base+0x02 holds the owner (0 = P1, 1 = P2) and base+0x1C the next index (-1 ends).
+local OBJECT_LIST_INDEX = 0x02068A96
+local OBJECT_BASE       = 0x02028990
+local PROJECTILE_LIST   = 3
+local MAX_PROJECTILES   = 30
+
+local function draw_projectile_boxes(mode, screen_x, screen_y, sw, sh)
+    local idx = read_word_signed(OBJECT_LIST_INDEX + PROJECTILE_LIST * 2)
+    local count = 0
+    while idx and idx >= 0 and count < MAX_PROJECTILES do
+        local base = OBJECT_BASE + idx * 0x800
+        local owner = read(base + 0x2)
+        if owner and (mode == 2 or mode == owner + 3) then
+            local friends = read(base + 0x1) or 0
+            draw_object_boxes(base, screen_x, screen_y, sw, sh, friends > 1)
+        end
+        idx = read_word_signed(base + 0x1C)
+        count = count + 1
+    end
+end
+
 local function draw_hitboxes()
     local mode = hitbox_setting.selected_option or 1
     if mode == 1 then return end
@@ -773,8 +802,12 @@ local function draw_hitboxes()
 
     for p, base in ipairs(PLAYER_BASES) do
         if mode == 2 or mode == p + 2 then
-            draw_player_boxes(base, screen_x, screen_y, sw, sh)
+            draw_object_boxes(base, screen_x, screen_y, sw, sh, false)
         end
+    end
+
+    if projectile_box_setting.enabled then
+        draw_projectile_boxes(mode, screen_x, screen_y, sw, sh)
     end
 end
 
