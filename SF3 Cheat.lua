@@ -207,6 +207,31 @@ end
 
 -- Keeps super stocks at the character's max (Grouflon's refill logic):
 -- master count, slave count, max count, and the HUD update flag.
+-- EXPERIMENTAL one-hit KO against the player whose health is at health_addr.
+-- 1) Write max damage into the target's "damage of next received hit" byte
+--    (base+0xA3, from the user's memory sheet; Grouflon reads the same byte).
+--    The game may recalculate it on the hit frame, so this alone may do nothing.
+-- 2) Fallback: if the target's health went down since last frame, set it to 0.
+--    Chip damage on block also counts as a hit.
+local function make_one_hit_ko(health_addr, next_damage_addr)
+    local prev
+    local cheat = {}
+    cheat.on_frame = function()
+        write(next_damage_addr, 0xA0)
+        local hp = read(health_addr)
+        if hp and prev and hp < prev and hp > 0 then
+            write(health_addr, 0x00)
+            hp = 0
+        end
+        prev = hp
+    end
+    cheat.on_disable = function() prev = nil end
+    return cheat
+end
+
+local KO_VS_P2 = make_one_hit_ko(0x20691A3, 0x20691A7)
+local KO_VS_P1 = make_one_hit_ko(0x2068D0B, 0x2068D0F)
+
 local function fill_stocks(master, slave, max_addr, update_flag)
     local max = read(max_addr)
     if not max or max == 0 then return end
@@ -251,6 +276,9 @@ local cheats = {
       address={0x2068D0B}, values={0xA0}, default_values={0x00}, enabled=false },
     { name="Drain All Energy PL1", category="P1",
       address={0x2068D0B}, values={0x00}, default_values={0xA0}, enabled=false },
+    -- P1's hits KO P2
+    { name="One-Hit KO PL1 (exp.)", category="P1", enabled=false,
+      on_frame=KO_VS_P2.on_frame, on_disable=KO_VS_P2.on_disable },
     { name="Infinite Power PL1", category="P1",
       address={0x20695B5}, values={0xA0}, default_values={0x00}, enabled=false },
     { name="Infinite Gauge PL1", category="P1", enabled=false,
@@ -301,6 +329,9 @@ local cheats = {
       address={0x20691A3}, values={0xA0}, default_values={0x00}, enabled=false },
     { name="Drain All Energy PL2", category="P2",
       address={0x20691A3}, values={0x00}, default_values={0xA0}, enabled=false },
+    -- P2's hits KO P1
+    { name="One-Hit KO PL2 (exp.)", category="P2", enabled=false,
+      on_frame=KO_VS_P1.on_frame, on_disable=KO_VS_P1.on_disable },
     { name="Infinite Power PL2", category="P2",
       address={0x20695E1}, values={0xA0}, default_values={0x00}, enabled=false },
     { name="Infinite Gauge PL2", category="P2", enabled=false,
@@ -526,6 +557,7 @@ end
 local function toggle_cheat(c)
     if c.on_frame or c.ui_only then
         c.enabled = not c.enabled
+        if not c.enabled and c.on_disable then c.on_disable() end
         return
     end
     if not c.address or not c.values then return end
