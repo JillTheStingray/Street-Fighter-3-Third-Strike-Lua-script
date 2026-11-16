@@ -26,20 +26,20 @@ local function safe_bor(a, b)
 end
 
 ---------------------------------------------------------------
--- COLORS  (0xFFRRGGBB integers — FBNeo does not accept "#RRGGBB" strings)
+-- COLORS  (0xRRGGBBAA integers — FBNeo does not accept "#RRGGBB" strings)
 ---------------------------------------------------------------
-local COLOR_BG        = 0xFF001820
-local COLOR_BORDER    = 0xFF00E5FF
-local COLOR_BORDER_DIM= 0xFF0088AA
-local COLOR_TITLE_BAR = 0xFF002833
-local COLOR_HIGHLIGHT1= 0xFF004860
-local COLOR_HIGHLIGHT2= 0xFF007A99
-local COLOR_TAB_ACTIVE= 0xFF00E5FF
-local COLOR_TAB_INACT = 0xFF4C6E7A
-local COLOR_FOOTER_BG = 0xFF001015
-local COLOR_ACTIVE    = 0xFFFF6060
-local COLOR_TEXT      = 0xFFE0F8FF
-local COLOR_STATUS    = 0xFF7FE8FF
+local COLOR_BG        = 0x001820FF
+local COLOR_BORDER    = 0x00E5FFFF
+local COLOR_BORDER_DIM= 0x0088AAFF
+local COLOR_TITLE_BAR = 0x002833FF
+local COLOR_HIGHLIGHT1= 0x004860FF
+local COLOR_HIGHLIGHT2= 0x007A99FF
+local COLOR_TAB_ACTIVE= 0x00E5FFFF
+local COLOR_TAB_INACT = 0x4C6E7AFF
+local COLOR_FOOTER_BG = 0x001015FF
+local COLOR_ACTIVE    = 0xFF6060FF
+local COLOR_TEXT      = 0xE0F8FFFF
+local COLOR_STATUS    = 0x7FE8FFFF
 
 ---------------------------------------------------------------
 -- UI CONFIG
@@ -57,11 +57,17 @@ local function write(addr, val)
     return pcall(memory.writebyte, addr, val)
 end
 
-local function read(addr)
-    local ok, v = pcall(memory.readbyte, addr)
+local function safe_read(fn, addr)
+    if not fn then return nil end
+    local ok, v = pcall(fn, addr)
     if ok then return v end
     return nil
 end
+
+local function read(addr)             return safe_read(memory.readbyte, addr) end
+local function read_byte_signed(addr) return safe_read(memory.readbytesigned, addr) end
+local function read_word_signed(addr) return safe_read(memory.readwordsigned, addr) end
+local function read_dword(addr)       return safe_read(memory.readdword, addr) end
 
 ---------------------------------------------------------------
 -- OPTION LIST BUILDERS
@@ -442,12 +448,19 @@ local cheats = {
       uc_addr=0x2069325, options=cancel_options_1() },
     { name="Universal Cancel #2 PL2", category="Universal", selected_option=1,
       uc_addr=0x2069325, options=cancel_options_2() },
+
+    -----------------------------------------------------------
+    -- DISPLAY TAB  (overlay settings only, no memory writes)
+    -----------------------------------------------------------
+    { name="Hitboxes", category="Display", selected_option=1,
+      options={ {name="Disabled"}, {name="Both"}, {name="P1 only"}, {name="P2 only"} } },
+    { name="Push Boxes", category="Display", ui_only=true, enabled=false },
 }
 
 ---------------------------------------------------------------
 -- TAB + NAVIGATION SYSTEM
 ---------------------------------------------------------------
-local tabs = {"P1","P2","System","Parry","Universal"}
+local tabs = {"P1","P2","System","Parry","Universal","Display"}
 local current_tab_index = 1
 local current_cheat_index = 1
 
@@ -511,7 +524,7 @@ local function disable_conflicts(target)
 end
 
 local function toggle_cheat(c)
-    if c.on_frame then
+    if c.on_frame or c.ui_only then
         c.enabled = not c.enabled
         return
     end
@@ -646,6 +659,94 @@ local function handle_input()
 end
 
 ---------------------------------------------------------------
+-- HITBOX VIEWER  (ported from Grouflon/3rd_training_lua draw.lua + gamestate.lua)
+-- Box pointers sit in the player object (see the user's memory sheet, base+0x2A0..0x2D4);
+-- each box is 4 signed words: left, width, bottom, height.
+---------------------------------------------------------------
+local PLAYER_BASES = {0x2068C6C, 0x2069104}
+
+local BOX_LISTS = {
+    {offset=0x2D4, type="push",               count=1},
+    {offset=0x2C0, type="throwable",          count=1},
+    {offset=0x2A0, type="vulnerability",      count=4},
+    {offset=0x2A8, type="ext. vulnerability", count=4},
+    {offset=0x2C8, type="attack",             count=4},
+    {offset=0x2B8, type="throw",              count=1},
+}
+
+local BOX_COLORS = {
+    ["push"]               = 0xFF00FFFF,
+    ["throwable"]          = 0x00FF00FF,
+    ["vulnerability"]      = 0x0000FFFF,
+    ["ext. vulnerability"] = 0x00FFFFFF,
+    ["attack"]             = 0xFF0000FF,
+    ["throw"]              = 0xFFFF00FF,
+}
+
+local GROUND_OFFSET = 23
+
+local function find_cheat(name)
+    for _, c in ipairs(cheats) do
+        if c.name == name then return c end
+    end
+end
+
+local hitbox_setting = find_cheat("Hitboxes")
+local push_box_setting = find_cheat("Push Boxes")
+
+local function draw_player_boxes(base, screen_x, screen_y, sw, sh)
+    local valid = read_dword(base + 0x2A0)
+    if not valid or valid == 0 then return end
+
+    local pos_x  = read_word_signed(base + 0x64)
+    local pos_y  = read_word_signed(base + 0x68)
+    local flip_x = read_byte_signed(base + 0x0A)
+    if not pos_x or not pos_y or not flip_x then return end
+
+    local px = pos_x - screen_x + sw / 2
+    local py = sh - (pos_y - screen_y) - GROUND_OFFSET
+
+    for _, list in ipairs(BOX_LISTS) do
+        if list.type ~= "push" or push_box_setting.enabled then
+            local first = read_dword(base + list.offset)
+            if first and first ~= 0 then
+                for i = 1, list.count do
+                    local ptr    = first + (i - 1) * 8
+                    local left   = read_word_signed(ptr)
+                    local width  = read_word_signed(ptr + 2)
+                    local bottom = read_word_signed(ptr + 4)
+                    local height = read_word_signed(ptr + 6)
+                    if left and width and bottom and height and width ~= 0 and height ~= 0 then
+                        local l
+                        if flip_x == 0 then l = px + left else l = px - left - width end
+                        local r = l + width
+                        local b = py - bottom
+                        local t = b - height
+                        gui.box(l, b, r, t, 0x00000000, BOX_COLORS[list.type])
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function draw_hitboxes()
+    local mode = hitbox_setting.selected_option or 1
+    if mode == 1 then return end
+
+    local screen_x = read_word_signed(0x02026CB0)
+    local screen_y = read_word_signed(0x02026CB4)
+    if not screen_x or not screen_y then return end
+    local sw, sh = emu.screenwidth(), emu.screenheight()
+
+    for p, base in ipairs(PLAYER_BASES) do
+        if mode == 2 or mode == p + 2 then
+            draw_player_boxes(base, screen_x, screen_y, sw, sh)
+        end
+    end
+end
+
+---------------------------------------------------------------
 -- DRAW MENU (auto size + scroll + compact layout)
 ---------------------------------------------------------------
 local function draw_menu()
@@ -678,7 +779,7 @@ local function draw_menu()
     -- title bar (smaller now)
     gui.box(x+4, y+3, x+MENU_WIDTH-4, y+15, COLOR_TITLE_BAR, COLOR_BORDER)
     gui.text(x+10, y+5, "SF3 Cyber Trainer", COLOR_BORDER)
-    gui.text(x+MENU_WIDTH-70, y+5, "[M] Hide", 0xFF80F5FF)
+    gui.text(x+MENU_WIDTH-70, y+5, "[M] Hide", 0x80F5FFFF)
 
     -- tabs
     local tab_y = y + 19
@@ -730,12 +831,12 @@ local function draw_menu()
         local bar_y1 = base_y
         local bar_y2 = base_y + (MAX_VISIBLE * ROW_HEIGHT)
 
-        gui.box(bar_x-1, bar_y1, bar_x+1, bar_y2, 0xFF004466, 0xFF004466)
+        gui.box(bar_x-1, bar_y1, bar_x+1, bar_y2, 0x004466FF, 0x004466FF)
 
         local pos = (current_cheat_index - 1) / (#list - 1)
         local handle_y = bar_y1 + pos * (MAX_VISIBLE * ROW_HEIGHT - 6)
 
-        gui.box(bar_x-1, handle_y, bar_x+1, handle_y+6, 0xFF00E5FF, 0xFF00AACC)
+        gui.box(bar_x-1, handle_y, bar_x+1, handle_y+6, 0x00E5FFFF, 0x00AACCFF)
     end
 
     gui.box(x+4, y+menu_height-14, x+MENU_WIDTH-4, y+menu_height-3, COLOR_FOOTER_BG, COLOR_BORDER_DIM)
@@ -759,6 +860,7 @@ while true do
     end
 
     apply_universal_cancel()
+    pcall(draw_hitboxes)
     draw_menu()
     emu.frameadvance()
 end
